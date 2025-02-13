@@ -30,6 +30,26 @@ export const useTextToSpeech = () => {
     setIsPaused(false);
   }, [toast]);
 
+  const skipForward = useCallback(() => {
+    if (utterance) {
+      // Skip forward by adjusting the current position
+      const currentTime = window.speechSynthesis.speaking ? utterance.elapsedTime || 0 : 0;
+      utterance.elapsedTime = currentTime + 10;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [utterance]);
+
+  const skipBackward = useCallback(() => {
+    if (utterance) {
+      // Skip backward by adjusting the current position
+      const currentTime = window.speechSynthesis.speaking ? utterance.elapsedTime || 0 : 0;
+      utterance.elapsedTime = Math.max(0, currentTime - 10);
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+  }, [utterance]);
+
   const pause = useCallback(() => {
     window.speechSynthesis.pause();
     setIsPaused(true);
@@ -53,5 +73,7 @@ export const useTextToSpeech = () => {
     pause,
     resume,
     stop,
+    skipForward,
+    skipBackward,
   };
 };

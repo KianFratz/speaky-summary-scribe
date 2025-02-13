@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 
 const Index = () => {
   const [text, setText] = useState('');
-  const { isPlaying, isPaused, speak, pause, resume, stop } = useTextToSpeech();
+  const { isPlaying, isPaused, speak, pause, resume, stop, skipForward, skipBackward } = useTextToSpeech();
   const { analysis, analyzeText } = useTextAnalysis();
 
   useEffect(() => {
@@ -39,6 +39,8 @@ const Index = () => {
               onPause={pause}
               onResume={resume}
               onStop={stop}
+              onSkipForward={skipForward}
+              onSkipBackward={skipBackward}
             />
 
             {text && <TextAnalysis {...analysis} />}

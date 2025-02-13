@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Square, RotateCcw } from "lucide-react";
+import { Play, Pause, Square, SkipBack, SkipForward } from "lucide-react";
 
 interface PlaybackControlsProps {
   isPlaying: boolean;
@@ -10,6 +10,8 @@ interface PlaybackControlsProps {
   onPause: () => void;
   onResume: () => void;
   onStop: () => void;
+  onSkipForward: () => void;
+  onSkipBackward: () => void;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({
@@ -19,9 +21,21 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   onPause,
   onResume,
   onStop,
+  onSkipForward,
+  onSkipBackward,
 }) => {
   return (
     <div className="flex items-center justify-center gap-4 animate-fade-in">
+      <Button
+        onClick={onSkipBackward}
+        variant="outline"
+        size="icon"
+        className="w-12 h-12 rounded-full transition-all duration-200 hover:scale-105"
+        disabled={!isPlaying && !isPaused}
+      >
+        <SkipBack className="h-6 w-6" />
+      </Button>
+
       {!isPlaying || isPaused ? (
         <Button
           onClick={isPaused ? onResume : onPlay}
@@ -50,6 +64,16 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         disabled={!isPlaying && !isPaused}
       >
         <Square className="h-6 w-6" />
+      </Button>
+
+      <Button
+        onClick={onSkipForward}
+        variant="outline"
+        size="icon"
+        className="w-12 h-12 rounded-full transition-all duration-200 hover:scale-105"
+        disabled={!isPlaying && !isPaused}
+      >
+        <SkipForward className="h-6 w-6" />
       </Button>
     </div>
   );
