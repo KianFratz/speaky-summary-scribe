@@ -7,8 +7,9 @@ export const useTextToSpeech = () => {
   const [isPaused, setIsPaused] = useState(false);
   const { toast } = useToast();
   const [utterance, setUtterance] = useState<SpeechSynthesisUtterance | null>(null);
+  const [currentText, setCurrentText] = useState('');
 
-  const speak = useCallback((text: string) => {
+  const speak = useCallback((text: string, startPosition = 0) => {
     if (!text) {
       toast({
         title: "Error",
@@ -18,12 +19,19 @@ export const useTextToSpeech = () => {
       return;
     }
 
-    const newUtterance = new SpeechSynthesisUtterance(text);
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+
+    // If we're skipping, we'll start from a different position in the text
+    const textToSpeak = text.slice(startPosition);
+    const newUtterance = new SpeechSynthesisUtterance(textToSpeak);
+    
     newUtterance.onend = () => {
       setIsPlaying(false);
       setIsPaused(false);
     };
 
+    setCurrentText(text);
     setUtterance(newUtterance);
     window.speechSynthesis.speak(newUtterance);
     setIsPlaying(true);
@@ -31,24 +39,24 @@ export const useTextToSpeech = () => {
   }, [toast]);
 
   const skipForward = useCallback(() => {
-    if (utterance) {
-      // Skip forward by adjusting the current position
-      const currentTime = window.speechSynthesis.speaking ? utterance.elapsedTime || 0 : 0;
-      utterance.elapsedTime = currentTime + 10;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
+    if (currentText && isPlaying) {
+      // Calculate new position (skip roughly 10 words forward)
+      const words = currentText.split(' ');
+      const currentPosition = Math.floor(words.length * 0.2); // Skip about 20% forward
+      const newText = words.slice(currentPosition).join(' ');
+      speak(newText);
     }
-  }, [utterance]);
+  }, [currentText, isPlaying, speak]);
 
   const skipBackward = useCallback(() => {
-    if (utterance) {
-      // Skip backward by adjusting the current position
-      const currentTime = window.speechSynthesis.speaking ? utterance.elapsedTime || 0 : 0;
-      utterance.elapsedTime = Math.max(0, currentTime - 10);
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
+    if (currentText && isPlaying) {
+      // Calculate new position (skip roughly 10 words backward)
+      const words = currentText.split(' ');
+      const currentPosition = Math.max(0, Math.floor(words.length * 0.2)); // Skip about 20% backward
+      const newText = words.slice(-currentPosition).join(' ');
+      speak(newText);
     }
-  }, [utterance]);
+  }, [currentText, isPlaying, speak]);
 
   const pause = useCallback(() => {
     window.speechSynthesis.pause();
